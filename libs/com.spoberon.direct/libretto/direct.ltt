@@ -1,0 +1,157 @@
+package com/spoberon/direct
+
+use libretto/io
+use libretto/data
+use libretto/util
+use libretto/web/app
+use com/teacode/data as ctd
+
+/*
+root
+  !bases
+    !byId
+      !id -> String! // id в имя базы
+    !byName
+      !name -> Int! // имя базы в id
+*/
+
+struct Group(raw: data/DirectGroup!)
+struct Base(name: String!, id: Int!, group: Group!)
+
+def Base raw: data/Data! = this.group.raw.dataById(this.id).*dyn(#!)
+
+def Group local(name: String!) = ctd/RawData(this.gecrBase(name).raw)
+
+//def Base id = this.raw.id
+
+def Base dump(p: io/Path!) = {
+  data/dump(this.raw, p)
+}
+
+def Group getBase(id: Int!): Base? = {
+  fix group = this.raw
+  fix byIdMap = this.byIdMap
+  fix name: String? = byIdMap!id.*dyn(#String?)
+  if(name) as n {
+    //fix data: data/Data! = group.dataById(id).*dyn(#!)
+    Base(n, id, this)
+  }
+}
+
+def Group getBase(name: String!): Base? = {
+  fix group = this.raw
+  fix byNameMap = this.byNameMap
+  fix id: Int? = byNameMap!name.*dyn(#Int?)
+  if(id) as i {
+    //fix data: data/Data! = group.dataById(i).*dyn(#!)
+    Base(name, i, this)
+  }
+}
+
+def Group gecrBase(name: String!): Base! = {
+  fix group = this.raw
+  fix basesMap = this.basesMap
+  fix byNameMap = basesMap.gecr(byName)
+  fix id: Int? = byNameMap!name.*dyn(#Int?)
+  if(id) as i {
+    //fix data: data/Data! = group.dataById(i).*dyn(#!)
+    Base(name, i, this)
+  }
+  else {
+    fix byIdMap = basesMap.gecr(byId)
+    fix data = group.newData()
+    fix id = data.id
+    byIdMap!id = name
+    byNameMap!name = id
+    Base(name, id, this)
+  }
+}
+
+def Group listBases: Base* = {
+  fix group = this.raw
+  fix byIdMap = this.byIdMap
+  fix ids = byIdMap.keys.*dyn(#Int*).*util/sort($)
+  ids as id.{
+    fix name: String! = byIdMap!id.*dyn(#String!)
+    Base(name, id, this)
+  }
+}
+
+def Group listBasesNames: String* = {
+  fix group = this.raw
+  fix byNameMap = this.byNameMap
+  fix names = byNameMap.keys.*dyn(#String*).*util/sort($)
+  names
+}
+
+def Group newBase(name: String!): Base! = {
+  if(not this.exists(name)){
+    fix group = this.raw
+    fix basesMap = this.basesMap
+    fix byIdMap = basesMap.gecr(byId)
+    fix byNameMap = basesMap.gecr(byName)
+    fix data = group.newData()
+    fix id = data.id
+    byIdMap!id = name
+    byNameMap!name = id
+    Base(name, id, this)
+  }
+  else
+    error("Base #{name} already exists"!)
+}
+
+def Group exists(name: String!): Unit? =
+  name in this.byNameMap.keys
+
+def Group exists(id: Int!): Unit? =
+  id in this.byIdMap.keys
+
+def Group byIdMap: data/Map! =
+  this.basesMap.gecr(byId)
+
+def Group byNameMap: data/Map! =
+  this.basesMap.gecr(byName)
+
+def Group basesMap: data/Map! =
+  data/root(this.raw.mainData).gecr(bases)
+
+def Group extraRootMap: ctd/Map! = 
+  ctd/root(ctd/RawData(this.raw.mainData)).gecr(extraRoot)
+
+def Group deleteBase(name: String!) = {
+  if(this.exists(name)){
+    fix base: Base! = this.getBase(name).*dyn(#!)
+    fix id: Int! = base.id
+
+    fix groupR = this.raw
+    fix basesMap = this.basesMap
+    fix byIdMap = basesMap.gecr(byId)
+    fix byNameMap = basesMap.gecr(byName)
+
+    byIdMap!id = ()
+    byNameMap!name = ()
+    base.raw.delete()
+  }
+}
+
+def dir = app/pStorage.p("direct")
+def level = 4
+def bases = 'bases
+def byId = 'byId
+def byName = 'byName
+def extraRoot = 'extraRoot
+
+def group = Group(data/directGroup(dir))
+
+def data/Map gecr(key: String!): data/Map! = {
+  fix id = this!key.*dyn(#Int?)
+  if(id) as i {
+    data/byId(this.data, i).*dyn(#!)
+  }
+  else {
+    fix map = data/new(this.data)
+    this!key = map.id
+    map
+  }
+}
+//132

@@ -1,0 +1,23 @@
+package view
+    
+use com/teacode/jetx/q
+    
+def page(title:String?, content:Any*) = 
+    <html>
+      <head>
+        <title>#{title}</title>
+        <script src="/jquery/jquery.min.js"/>
+        #{q/js}
+        <link rel="stylesheet" type="text/css" href="/main.css"/>
+      </head>
+      <body>
+        #{content}
+      </body>
+    </html>
+
+
+
+
+
+
+

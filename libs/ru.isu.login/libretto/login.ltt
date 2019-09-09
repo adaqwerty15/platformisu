@@ -1,0 +1,29 @@
+package ru/isu/login
+
+use libretto/data
+use com/teacode/data as ctd
+use com/teacode/string
+use com/teacode/jetx/q
+use libretto/web/app
+use com/spoberon/direct as d
+
+def createDB() = {
+
+	def root = ctd/root(data)
+	def group = d/Group(data/directGroup(groupDir))
+	def groupDir = app/pStorage.p(groupTitle)
+	def groupTitle = "logins"
+	def workOptions = data/defaultOption.readCache(unit).writeBuffer(unit)
+	def data: ctd/Data! = ctd/RawData(group.gecrBase("main").raw)
+
+	// def groupTitle = "logins"
+	// def groupDir = app/pStorage.p(groupTitle)
+	// def group = d/Group(data/directGroup(groupDir))
+	// def data: ctd/Data! = ctd/RawData(group.gecrBase("main").raw)
+	// def root = ctd/root(data)
+	q.info(root)
+}
+
+
+
+
