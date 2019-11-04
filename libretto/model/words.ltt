@@ -1,0 +1,29 @@
+package model
+
+use libretto/db
+use libretto/io
+use libretto/web/app
+use libretto/util
+
+//def db = db/dir: app/pStorage.p('settingsdb)
+
+def allWords:String* = {
+	var words:String* = ()
+      
+	// db.work(8): {
+	// 	db.prepare("select word from words;").query: {
+	//       fix row = $    
+	//       words += <<#{row.string(0)}>>!
+	//     }
+	// }
+	// db.close()
+	words
+}
+	
+def addWord(word:String!) = {
+	// db.work(8): {
+	// 	db.prepare("insert into words (word) values('"+word+"');").update()
+	// }
+	// db.close()
+  	()
+}

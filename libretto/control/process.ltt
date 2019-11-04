@@ -1,0 +1,16 @@
+package control
+	use com/teacode/jetx
+	use com/teacode/jetx/q
+	use com/teacode/jetx/router
+	use com/teacode/jetx/params
+	use com/teacode/jetx/response
+
+def process = jetx/process: {
+	out: response/out
+	step: params/read
+	step: router/resolve: {
+		route("~"):   packages('url)
+		q/route("~"): packages('ajax)
+	}
+	step: response/send
+}

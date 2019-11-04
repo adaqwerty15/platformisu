@@ -1,0 +1,134 @@
+// package model/login
+
+// use com/teacode/login/keys
+// use com/teacode/date
+// use com/teacode/string
+// use com/teacode/jet
+// use libretto/util
+// use libretto/text
+
+// // CREATE TABLE users (
+// // 	id	SERIAL,
+// // 	surname	varchar(70),		
+// // 	name	varchar(70),		
+// // 	lastname varchar(70),	
+// // 	birthday	date,			
+// // 	username	varchar(70),
+// // 	salt 	varchar(256),	
+// // 	hash	varchar(256),
+// // 	dateOfRegistration date, 	
+// // 	role	varchar(50)
+// // );
+
+// struct User(login:String!, registrationDate:date/Date!, uid:String!)
+// struct Password(salt:String!, hash:String!)
+
+// // def findUser(login:String!) = data.r:
+// // 	root.map(login.util/lower).User:$
+
+// // def User updateLogin(login:String!, password:String!) = data.w: {
+// // 	fix login = login.util/lower
+// // 	fix oldLogin = this.login
+// // 	root!login.error: "login '#{login}' already in use"!
+// // 	root!login = root.mape(oldLogin) as c {
+// // 		c!'login  = login
+// // 	}
+// // 	root!oldLogin = ()
+// // 	this
+// // }
+
+
+// // def RecoveryInstance delete = data.w: recoveryKeys.{
+// // 	gecr('uids)!(this.uid) = ()
+// // 	gecr('keys)!(this.key) = ()
+// // }
+
+// // def recoveryKey(login:String!) = data.w: {
+// // 	fix user = User: root.map(login.util/lower).
+// // 			*onEmpty(error: "there are no such user"!)
+// // 	recoveryKeys.gecr('uids)!(user.uid) as old.{
+// // 		recoveryKeys.gecr('keys)!old = ()
+// // 	}
+// // 	fix ri = RecoveryInstance: user.uid
+// // 	recoveryKeys.gecr('uids)!(user.uid) = ri.key
+// // 	recoveryKeys.gecr('keys)!(ri.key) = ri
+// // 	ri.key
+// // }
+
+// // def recover(recoveryKey:String!, password:String!) = data.w:{
+// // 	fix user = User:
+// // 		recoveryKeys.gecr('keys)!recoveryKey.
+// // 			*onEmpty( error: "wrong recovery key: #{recoveryKey}"! ).
+// // 			*dyn(#RecoveryInstance!) {delete}.
+// // 			uid
+// // 	root.map(user.login)!'password = Password: password
+// // 	unit
+// // }
+
+// def Password(pass:String!){
+// 	pass.{
+// 		string/length.where($ < 8).this.error: "too short pass"
+// 		string/length.where($ > 64).this.error: "too long pass"
+// 	}
+// 	fix salt = nextSalt(64)
+// 	fix hash = pass.salt: salt
+// 	Password(salt, hash, date/Date())
+// }
+
+// def Password string = "Password(...)"
+// def String salt(salt:String!) = (salt + this).util/sha2.toHex
+
+// def User password = util/to(#Password!): data.r:
+// 	root.map(this.login).value('password)
+// def User updatePassword(old:String!,new:String!) = data.w: {
+// 	fix access = root.	map(this.login).
+// 						value('password).
+// 						*dyn(#Password!).is: old
+// 	if (not access) error: "wrong current password"
+// 	root.map(this.login)!'password = Password: new
+// }
+
+// def Password is(pass:String!) =
+// 	this.hash == pass.salt: this.salt
+
+
+// def Int toHex: String! = {
+//   fix digit = this mod 16
+//   fix hexDigit = util/to(#!): ("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f").[digit]
+//   fix head = this div 16
+//   if (head > 0) {head.toHex + hexDigit} else {hexDigit}
+// }
+
+// def nextSalt(width: Int!): String! = text/fromCodes:
+// 	(1..width).{util/rnd.nextInt(0x7f - 0x20) + 0x20} // ascii printable characters
+
+// def User(map:data/Map!) = map.User:
+// 	stringe('login),
+// 	value('registrationDate).*dyn(#date/Date!),
+// 	stringe('uid)
+
+
+// def signIn(login:String!, pass:String!) = data.r: setUser: User:
+// 	root.map(login.util/lower).
+// 		where(value('password).*dyn(#Password!).is: pass).
+// 		*onEmpty(error: "there are no such user #{login} or wrong password"!)
+
+// def signOut() = jet/gmem(packageName, currentUserKey):()
+
+// def signUp(login:String!, pass:String!) = data.w: {
+// 	fix login = login.util/lower
+// 	root!login.error: "login '#{login}' already in use"!
+// 	User: root.gecr(login) as c {
+// 		c!'password = Password: pass
+// 		c!'login = login
+// 		c!'registrationDate = date/Date()
+// 		fix uid = uids.generateKey()
+// 		uids!uid = c
+// 		c!'uid = uid
+// 	}
+// }
+
+
+// package com/teacode/login/keys
+// struct Uid
+// struct Recovery

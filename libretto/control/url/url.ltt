@@ -1,0 +1,8 @@
+package url
+	use com/teacode/jetx
+	use view
+	use model
+
+def home = jetx/out: view/home(model/allWords)
+
+

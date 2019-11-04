@@ -1,0 +1,12 @@
+package view
+
+def String wordView = <div class="word">#{this}</div>
+
+def home(words:String*) = page("words"): <div class="main">
+	<img class="logo" src="/assets/images/libretto.png" alt="Libretto"/>
+	<form class="addWordForm" onsubmit=#q/ajax("addWord", "#word")>
+		<input autocomplete="off" placeholder="enter your word" type="text" id="word" name="word"/>
+		<button>Add</button>
+	</form>
+	<div id="words">#{words.wordView}</div>
+</div>
