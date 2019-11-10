@@ -1,1 +1,1 @@
-Libretto+Jet example
+Libretto application
