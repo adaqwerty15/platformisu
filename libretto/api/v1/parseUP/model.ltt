@@ -1,0 +1,25 @@
+package lessonplan/model
+
+struct Plans {
+	fix planStroke: PlanStroke*
+}	
+struct PlanStroke {
+	fix code: String?
+	fix name:String?
+	fix kurs: Int?
+	fix sem: Int?
+	fix department:Int?
+	fix TypesOfWork: TypeOfWork*
+}
+
+struct TypeOfWork {
+	fix name: String?
+	fix count: Int?
+	fix kurs: Int?
+	fix sem: Int?
+}
+
+struct KS {
+	fix kurs: Int?
+	fix sem: Int?
+}	

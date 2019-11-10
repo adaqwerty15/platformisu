@@ -1,0 +1,43 @@
+package lessonplan
+
+use libretto/io
+use libretto/web/app
+use libretto/xml
+use com/teacode/string
+use com/teacode/xrunner as x
+use lessonplan/model as lm
+
+def getPlan = {
+
+  fix plan = app/pStorage.p("test.plx").xml
+  fix planstroke = plan.x/ee('ПланыСтроки)
+
+  var newPlan: lm/PlanStroke* = ()
+
+  planstroke as ed.{
+      
+    fix disc = plan.x/ee('ПланыНовыеЧасы)?[x/a('КодОбъекта)==ed.x/a('Код)]
+
+    fix code = $.x/a('ДисциплинаКод)
+    fix name = $.x/a('Дисциплина)
+    fix department = ($.x/a('КодКафедры)).string/toInt
+
+    if (department!=()) {
+      var tows:lm/TypeOfWork* = ()
+      var courses:lm/KS* = ()
+      disc as disc.{
+        if ((disc.x/a("КодВидаРаботы")).string/toInt in (1, 2, 3, 101, 102, 103)) {
+          fix ks = lm/KS(($.x/a('Курс)).string/toInt, ($.x/a('Семестр)).string/toInt)
+          if (ks in courses) {}
+          else courses+=ks
+          tows += lm/TypeOfWork(plan.x/ee('СправочникВидыРабот)?[x/a('Код)==disc.x/a('КодВидаРаботы)].x/a('Аббревиатура).[0], ($.x/a('Количество)).string/toInt, ($.x/a('Курс)).string/toInt, ($.x/a('Семестр)).string/toInt)  
+        } 
+      }
+     
+      courses as cs.{ 
+        newPlan += lm/PlanStroke(code, name, $.kurs , $.sem , department, tows.where($.kurs==cs.kurs and $.sem==cs.sem))
+      }  
+    } 
+  }
+    lm/Plans(newPlan)
+}

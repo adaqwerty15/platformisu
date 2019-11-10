@@ -2,6 +2,7 @@ package url
 	use com/teacode/jetx
 	use view
 	use model
+	use lessonplan
 
 def home = jetx/out: view/home(model/allWords)
 

@@ -3,10 +3,12 @@ package ajax
 	use com/teacode/jetx/q
 	use view
 	use model
+	use lessonplan
 	
 def addWord = {
 	fix word = jetx/params.stringe: 'word
 	model/addWord: word
 	q/q("#word").val: ()
 	q/q("#words").prepend: word.view/wordView
+	//println: lessonplan/getPlan
 }
